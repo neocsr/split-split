@@ -1,0 +1,5 @@
+require 'minitest/autorun'
+require_relative '../lib/screen'
+require_relative '../lib/pane'
+require_relative '../lib/frame'
+require_relative '../lib/point'

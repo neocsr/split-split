@@ -1,39 +1,50 @@
 require_relative './pane'
+require_relative './frame'
 
 class Screen
 
   attr_accessor :cols
   attr_accessor :rows
-  attr_accessor :pane
+  attr_accessor :panes
+  attr_accessor :frame
 
   def initialize
     @cols  = [0.0, 1.0]
     @rows  = [0.0, 1.0]
-    @pane  = Pane.new
-    @vsplit_count = 0
-    @hsplit_count = 0
+    @frame = Frame.new
+    @panes = [Pane.new]
   end
 
-  def generate_cells
-    pane.generate_cells
+  def active_pane
+    panes.find { |p| p.active? }
   end
 
-  def find_active
-    pane.find_active
+  def add_pane origin, size
+    panes << Pane.new(origin.dup, size.dup)
+  end
+
+  def new_origin
+    (frame.origin + frame.size) - (active_pane.origin + active_pane.size)
+  end
+
+  def new_size origin
+    frame.size - origin
   end
 
   def vsplit
     @cols = split(cols)
-    pane.find_active.vsplit
-    pane.hupdate_cells(@vsplit_count, @hsplit_count)
-    @vsplit_count += 1
+    pane = active_pane
+    pane.active = 0
+    origin, size = pane.contract_width
+    add_pane(origin, size)
   end
 
   def hsplit
     @rows = split(rows)
-    pane.find_active.hsplit
-    pane.vupdate_cells(@vsplit_count, @hsplit_count)
-    @hsplit_count += 1
+    pane = active_pane
+    pane.active = 0
+    origin, size = pane.contract_height
+    add_pane(origin, size)
   end
 
   def split array
@@ -41,8 +52,12 @@ class Screen
     (0..n).to_a.map { |e| e/n.to_f }
   end
 
-  def to_s
-    pane.to_s
+  def to_layout
+    panes
+      .map do |pane|
+        pane.to_layout(@cols.size - 1, @rows.size - 1)
+            .map{ |p| p.round }
+      end
   end
 
 end

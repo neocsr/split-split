@@ -1,5 +1,4 @@
-require 'minitest/autorun'
-require_relative '../lib/pane'
+require 'test_helper'
 
 class PaneTest < Minitest::Test
 
@@ -8,9 +7,7 @@ class PaneTest < Minitest::Test
   end
 
   def test_new
-    assert_nil @pane.left
-    assert_nil @pane.right
     assert_equal 1, @pane.active
+    assert_equal '[0, 0, 1, 1]', @pane.to_layout.inspect
   end
-
 end
