@@ -1,13 +1,16 @@
-require_relative './point'
-
 class Pane
-  attr_reader :origin
-  attr_reader :size
+
+  attr_reader :x
+  attr_reader :y
+  attr_reader :width
+  attr_reader :height
   attr_accessor :active
 
-  def initialize origin = Point.new(0.0, 0.0), size = Point.new(1.0, 1.0)
-    @origin = origin
-    @size = size
+  def initialize x = 0.0, y = 0.0, width = 1.0, height = 1.0
+    @x = x
+    @y = y
+    @width = width
+    @height = height
     @active = 1
   end
 
@@ -15,22 +18,30 @@ class Pane
     active == 1
   end
 
-  def contract_height
-    @size.height /= 2
-    new_origin = Point.new(@origin.x, @origin.y + @size.height)
-    [new_origin, @size]
+  def split_vertically
+    @height /= 2.0
+    @active = 0
+    [self, Pane.new(@x, @y + @height, @width, @height)]
   end
 
-  def contract_width
-    @size.width /= 2
-    new_origin = Point.new(@origin.x + @size.width, @origin.y)
-    [new_origin, @size]
+  def split_horizontally
+    @width /= 2.0
+    @active = 0
+    [self, Pane.new(@x + @width, @y, @width, @height)]
   end
 
-  def to_layout xscale = 1, yscale = 1
-    [ xscale * origin.x,
-      yscale * origin.y,
-      xscale * (origin.x + size.width),
-      yscale * (origin.y + size.height) ]
+  def to_a
+    [x, y, width, height]
+  end
+
+  def to_coordinate
+    [x, y, x + width, y + height]
+  end
+
+  def to_layout x_scale = 1, y_scale = 1
+    [ x_scale * x,
+      y_scale * y,
+      x + (x_scale * width),
+      y + (y_scale * height) ].map(&:round)
   end
 end
